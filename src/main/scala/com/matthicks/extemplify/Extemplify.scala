@@ -41,6 +41,10 @@ class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputD
   val lessDirectory = new File(template, "less")
 
   def execute(): Unit = {
+    // Delete the output directory
+    logger.info(s"Deleting anything in ${output.getName}...")
+    FileUtils.deleteDirectory(output)
+
     // Generate pages
     pagesDirectory.listFiles.foreach {
       case f if f.getName.endsWith(".html") => processPage(f)
