@@ -26,12 +26,12 @@ object Extemplify {
   }
 
   def execute(config: Config): Unit = {
-    val e = new Extemplify(config.input, config.output, config.compressCSS, config.lessOutputSubDirectory)
+    val e = new Extemplify(config.input, config.output, config.compressCSS, config.lessOutputSubDirectory, config.sassOutputSubDirectory)
     e.execute()
   }
 }
 
-class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputDirectory: String) extends Logging {
+class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputDirectory: String, sassOutputDirectory: String) extends Logging {
   import Extemplify._
 
   var partials = Map.empty[String, String]
@@ -39,6 +39,7 @@ class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputD
   val partialsDirectory = new File(template, "partials")
   val assetsDirectory = new File(template, "assets")
   val lessDirectory = new File(template, "less")
+  val sassDirectory = new File(template, "sass")
 
   def execute(): Unit = {
     // Delete the output directory
@@ -68,6 +69,15 @@ class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputD
         case _ => // Ignore others
       }
     }
+    // Compile SASS files
+    if (sassDirectory.exists()) {
+      sassDirectory.listFiles().foreach {
+        case f if f.isFile && (f.getName.endsWith(".sass") || f.getName.endsWith(".scss")) => {
+          val filename = s"${f.getName.substring(0, f.getName.length - 5)}.css"
+          compileSass(f, new File(output, s"$sassOutputDirectory/$filename"), compressCSS)
+        }
+      }
+    }
   }
 
   private def compileLess(input: File, output: File, compress: Boolean): Unit = {
@@ -76,6 +86,15 @@ class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputD
     val exitCode = Seq(command, input.getAbsolutePath, output.getAbsolutePath) ! LoggingProcessLogger
     if (exitCode != 0) {
       throw new RuntimeException(s"Failed to compile LESS code!")
+    }
+  }
+
+  private def compileSass(input: File, output: File, compress: Boolean): Unit = {
+    logger.info(s"Compiling SASS file ${input.getName}...")
+    val command = "node_modules/node-sass/bin/node-sass"
+    val exitCode = Seq(command, input.getAbsolutePath, output.getAbsolutePath) ! LoggingProcessLogger
+    if (exitCode != 0) {
+      throw new RuntimeException(s"Failed to compile SASS code!")
     }
   }
 
