@@ -72,10 +72,11 @@ class Extemplify(template: File, output: File, compressCSS: Boolean, lessOutputD
     // Compile SASS files
     if (sassDirectory.exists()) {
       sassDirectory.listFiles().foreach {
-        case f if f.isFile && (f.getName.endsWith(".sass") || f.getName.endsWith(".scss")) => {
+        case f if f.isFile && (f.getName.endsWith(".sass") || f.getName.endsWith(".scss")) && !f.getName.startsWith("_") => {
           val filename = s"${f.getName.substring(0, f.getName.length - 5)}.css"
           compileSass(f, new File(output, s"$sassOutputDirectory/$filename"), compressCSS)
         }
+        case _ => // Ignore others
       }
     }
   }
