@@ -1,0 +1,2 @@
+# extemplify
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/92a222ba0d414e329b1c29eae805dbcb)](https://www.codacy.com/app/matthicks/extemplify?utm_source=github.com&utm_medium=referral&utm_content=outr/extemplify&utm_campaign=badger)
